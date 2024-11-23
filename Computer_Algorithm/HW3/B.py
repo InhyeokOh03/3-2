@@ -1,5 +1,5 @@
 import sys
-# sys.setrecursionlimit(2000) 
+sys.setrecursionlimit(2000) 
 
 
 def count_plans(days, bread):
@@ -7,7 +7,6 @@ def count_plans(days, bread):
     memo = {}
 
     # Recursive
-    # 남은 일수가 빵의 남은 개수의
     def dfs(remaining_days, remaining_bread, prev_eaten):
         if remaining_days == 0:
             return 1 if remaining_bread >= 0 else 0
@@ -20,18 +19,18 @@ def count_plans(days, bread):
             if remaining_bread < 0:
                 continue
                 
-            # if remaining_bread // 2 > remaining_days:
-            #     continue
-
-            # 조건 1
+            if remaining_bread < (remaining_days // 2):
+                continue
+                
+            # 1
             if today_eaten > remaining_bread:
                 break
 
-            # 조건 2
+            # 2
             if today_eaten == 0 and prev_eaten == 0:
                 continue
 
-            # 조건 3
+            # 3
             if prev_eaten != -1 and abs(today_eaten - prev_eaten) > 1:
                 continue
 
