@@ -33,29 +33,50 @@ def can_learn_paths(num_nodes, max_memory, edges):
 
 if __name__ == "__main__":
     results = []
-    empty_count = 0
+    try:
+        num_nodes, max_memory = map(int, input().strip().split())
+        
+        edges = []
 
-    while True:
-        try:
-            case_line = input().strip()
-
-            if not case_line:
+        for _ in range(int(num_nodes * (num_nodes - 1) / 2)):
+            line = input().strip()
+            if not line:
                 continue
-            num_nodes, max_memory = map(int, input().split())
+            node1, node2, distance = map(int, line.split())
+            edges.append((node1, node2, distance))
 
-            edges = []
-            for _ in range(int(num_nodes * (num_nodes - 1) / 2)):
-                node1, node2, distance = map(int, input().split())
-                edges.append((node1, node2, distance))
-            # print(edges)
-            empty_count = 0
-            case_number = case_line.split()[1].strip(":")
+        result = can_learn_paths(num_nodes, max_memory, edges)
+        results.append(result)
 
-            result = can_learn_paths(num_nodes, max_memory, edges)
-            results.append(f"case {case_number}:\n{result}")
-        except EOFError:
-            break
-    print("\n\n".join(results))
+    except EOFError:
+        pass
+    print("\n".join(map(str, results)))
+
+# if __name__ == "__main__":
+#     results = []
+#     empty_count = 0
+
+#     while True:
+#         try:
+#             case_line = input().strip()
+
+#             if not case_line:
+#                 continue
+#             num_nodes, max_memory = map(int, input().split())
+
+#             edges = []
+#             for _ in range(int(num_nodes * (num_nodes - 1) / 2)):
+#                 node1, node2, distance = map(int, input().split())
+#                 edges.append((node1, node2, distance))
+#             # print(edges)
+#             empty_count = 0
+#             case_number = case_line.split()[1].strip(":")
+
+#             result = can_learn_paths(num_nodes, max_memory, edges)
+#             results.append(f"case {case_number}:\n{result}")
+#         except EOFError:
+#             break
+#     print("\n\n".join(results))
 
 
 
