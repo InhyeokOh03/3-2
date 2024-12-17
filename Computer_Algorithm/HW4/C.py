@@ -1,66 +1,89 @@
-def bfs(capacity, flow, source, sink, parent):
-    visited = [False] * len(capacity)
-    queue = [source]
-    visited[source] = True
+def main(n, k, graph):
+    INF = 10**9 
 
-    while queue:
-        current = queue.pop(0)
+    g = [[] for _ in range(n)]
 
-        for neighbor in range(len(capacity[current])):
-            if not visited[neighbor] and capacity[current][neighbor] - flow[current][neighbor] > 0:
-                parent[neighbor] = current
-                visited[neighbor] = True
-                queue.append(neighbor)
-                if neighbor == sink:
-                    return True
-    return False
+    def add_edge(u, v, cap):
+        g[u].append([v, cap, len(g[v])])
+        g[v].append([u, 0, len(g[u]) - 1])
 
+    visited = [False]*n
+    visited[0] = True
+    queue = [0]
+    front = 0
+    while front < len(queue):
+        u = queue[front]
+        front += 1
+        for v, c in graph[u]:
+            if not visited[v]:
+                visited[v] = True
+                queue.append(v)
+    if not visited[n-1]:
+        return 0
 
-def edmonds_karp(capacity, source, sink):
-    n = len(capacity)
-    flow = [[0] * n for _ in range(n)]  # 플로우 초기화
-    max_flow = 0
-    parent = [-1] * n
+    added = set() 
+    for u in range(n):
+        for v, c in graph[u]:
+            edge_key = (min(u,v), max(u,v))
+            if edge_key not in added:
+                added.add(edge_key)
+                cap = c if c < k else INF
+                add_edge(u, v, cap)
+                add_edge(v, u, cap)
 
-    while bfs(capacity, flow, source, sink, parent):
-        # 증가 경로의 최소 용량 찾기
-        path_flow = float('Inf')
-        v = sink
-        while v != source:
-            u = parent[v]
-            path_flow = min(path_flow, capacity[u][v] - flow[u][v])
-            v = u
+    def bfs():
+        level = [-1]*n
+        level[0] = 0
+        q = [0]
+        front = 0
+        while front < len(q):
+            u = q[front]
+            front += 1
+            for i, (vv, cap, rev) in enumerate(g[u]):
+                if cap > 0 and level[vv] < 0:
+                    level[vv] = level[u] + 1
+                    q.append(vv)
+        return level
 
-        # 증가 경로로 플로우 전송
-        v = sink
-        while v != source:
-            u = parent[v]
-            flow[u][v] += path_flow
-            flow[v][u] -= path_flow
-            v = u
+    def send_flow(u, flow, level, it):
+        if u == n-1:
+            return flow
+        while it[u] < len(g[u]):
+            v, cap, rev = g[u][it[u]]
+            if cap > 0 and level[v] == level[u] + 1:
+                curr_flow = min(flow, cap)
+                temp = send_flow(v, curr_flow, level, it)
+                if temp > 0:
+                    g[u][it[u]][1] -= temp
+                    g[v][rev][1] += temp
+                    return temp
+            it[u] += 1
+        return 0
 
-        max_flow += path_flow
+    total_flow = 0
+    while True:
+        level = bfs()
+        if level[n-1] < 0:
+            break
+        it = [0]*n
+        while True:
+            f = send_flow(0, INF, level, it)
+            if f <= 0:
+                break
+            total_flow += f
 
-    return max_flow
+    if total_flow >= INF:
+        return -1
+    return total_flow
 
 
 if __name__ == "__main__":
-    # 입력 처리
     n, m, k = map(int, input().strip().split())
-    capacity = [[0] * n for _ in range(n)]  # 용량 그래프 초기화
-
+    graph = {i: [] for i in range(n)}
     for _ in range(m):
-        u, v, w = map(int, input().strip().split())
-        if w >= k:  # 길이가 K 이상인 다리는 제거
-            continue
-        capacity[u][v] += w
-        capacity[v][u] += w  # 양방향 다리
+        a, b, c = map(int, input().split())
+        graph[a].append((b, c))
+        graph[b].append((a, c))
 
-    # 최대 유량 계산
-    max_flow = edmonds_karp(capacity, 0, n - 1)
-
-    # 결과 출력
-    if max_flow == 0:  # 침략을 막을 수 없는 경우
-        print(-1)
-    else:
-        print(max_flow)
+    result = main(n, k, graph)
+    print(result)
